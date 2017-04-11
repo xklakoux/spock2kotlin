@@ -1,0 +1,23 @@
+(\s+)byte\s+§\1Byte §
+(\s+)short\s+§\1Short §
+(\s+)int\s+§\1Int §
+(\s+)long\s+§\1Long §
+(\s+)float\s+§\1Float §
+(\s+)double\s+§\1Double §
+(\s+)char\s+§\1Char §
+(\s+)boolean\s+§\1Boolean §
+^(\s+)def "(.*?)"\(\)\s*{§\1@Test\n\1fun `\2` () {§
+^(\s+)def\s+§\1§
+class\s+(\w+)\s+extends\s+Specification\s*{§class \1 {§
+(\s*)void\s+setup\s*\(\s*\)\s*{§\1@Before\n\1fun setup() {§
+^(\s+)(given|when|then):§\1\\\\\2§
+^(\s+)(.*?) >> (.+)\s*$§\1whenever(\2).thenReturn(\3)§
+^(\s+)(.*?) == (\S+)$§\1assertThat(\2).isEqualTo(\3)§
+^(\s+)(.*?)\.equals(\S+)$§\1assertThat(\2).isEqualTo\3§
+\s+new\s+§ §
+Mock\s*\(.*?\)§mock()§
+_§any()§
+#^(\s+)(.+)\s+(.*)\s+=§\1private val \3: \2 =§
+#todo eq
+#todo times
+#\s+\[§ arrayOf(§
