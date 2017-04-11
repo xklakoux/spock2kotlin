@@ -62,7 +62,7 @@ class SpockParser(object):
 
 if __name__ == '__main__':
     spock_file = sys.argv[1]
-    configuration = 'rules'
+    configuration = 'rules.conf'
     kotlin_path = ''.join(sys.argv[1].split('\\')[:-1]) + sys.argv[1].split('\\')[-1].split('.')[0] + ".kt"
 
     parser = SpockParser(spock_file, configuration)
