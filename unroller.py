@@ -1,40 +1,51 @@
+from enum import Enum
+import re
+
+
+class UnrollerState(Enum):
+    START = 0
+    NAMES = 1
+    VALUES = 2
+    END = 3
+
 
 class Unroller(object):
-    brackets_stack = []
-    names = []
-    values = []
-    recorded_lines = []
-    in_names = False
-    in_values = False
+    def __init__(self):
+        self.brackets_stack = []
+        self.names = []
+        self.values = []
+        self.recorded_lines = []
+        self.state = UnrollerState.START
 
     def record(self, line):
 
-        if self.in_names:
+        if self.state == UnrollerState.NAMES:
             self.names = [var.strip() for var in line.split('|')]
-            self.in_values = True
-            self.in_names = False
+            self.state = UnrollerState.VALUES
             return False
 
-        elif self.in_values:
+        elif self.state == UnrollerState.VALUES:
             if '|' in line:
                 self.values.append([var.strip() for var in line.split('|')])
             else:
-                self.in_values = False
+                self.state = UnrollerState.END
             return False
 
         if 'where:' in line:
-            self.in_names = True
+            self.state = UnrollerState.NAMES
             return False
 
         self.recorded_lines.append(line)
 
-        for char in line:
-            if char == '{':
-                self.brackets_stack.append('{')
-            if char == '}':
-                self.brackets_stack.pop()
-                if not len(self.brackets_stack):
-                    return True
+        if self.state == UnrollerState.START or self.state == UnrollerState.END:
+            for char in line:
+                if char == '{':
+                    self.brackets_stack.append('{')
+                if char == '}':
+                    self.brackets_stack.pop()
+                    if not len(self.brackets_stack):
+                        return True
+
         return False
 
     def unroll_tests(self):
