@@ -28,9 +28,9 @@ class Unroller(object):
         elif self.state == UnrollerState.VALUES:
             if '|' in line:
                 self.values.append([var.strip() for var in line.split('|')])
+                return False
             else:
                 self.state = UnrollerState.END
-            return False
 
         if 'where:' in line:
             self.state = UnrollerState.NAMES
@@ -39,30 +39,26 @@ class Unroller(object):
         self.recorded_lines.append(line)
 
         if self.state == UnrollerState.START or self.state == UnrollerState.END:
-            for char in line:
-                if char == '{':
-                    self.brackets_stack.append('{')
-                if char == '}':
-                    self.brackets_stack.pop()
-                    if not len(self.brackets_stack):
-                        return True
+            if '}' in line:
+                return True
 
         return False
 
     def unroll_tests(self):
         new_tests = []
-        for set_index, value_set in enumerate(self.values):
+        for set_index, set in enumerate(self.values):
             method_name = self.recorded_lines[0]
             for name_index, name in enumerate(self.names):
-                method_name = method_name.replace("#{}".format(name), value_set[name_index].strip('"'))
+                method_name = method_name.replace("#{}".format(name), set[name_index].strip('"'))
             new_tests.append(method_name)
             for line in self.recorded_lines[1:]:
 
                 for name_index, name in enumerate(self.names):
-                    line = line.replace(name, value_set[name_index])
+                    line = line.replace(name, set[name_index])
                 new_tests.append(line)
             new_tests.append('')
         return new_tests
+
 
     @staticmethod
     def parse(spock):

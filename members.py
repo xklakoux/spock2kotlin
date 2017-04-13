@@ -11,6 +11,9 @@ VAL_RULE = '^(\s+)(' + TYPE + ')\s+(' + VAR_NAME + ')\s*=(.*)§\\1private val \\
 class VarsParser(object):
     @staticmethod
     def parse(spock):
+        compiled_pattern = re.compile('^\s*(fun `.*?`\(\)\s*{|@Before)')
+        pattern, replace = VAR_RULE.split('§')[0:2]
+
         state = ParsingContext.INDETERMINATE
         new_lines = []
         for line in spock:
@@ -20,13 +23,12 @@ class VarsParser(object):
                 continue
 
             if state == ParsingContext.MEMBERS:
-                print("VARS " + line)
-                if len(re.findall(re.compile('^\s*(fun `.*?`\(\)\s*{|@Before)'), line)):
+                print("VARS: " + line)
+                if len(re.findall(compiled_pattern, line)):
                     new_lines.append(line)
                     state = ParsingContext.INDETERMINATE
                     continue
 
-                pattern, replace = VAR_RULE.split('§')[0:2]
                 new_line = re.sub(pattern, replace, line)
                 new_lines.append(new_line)
                 if new_line != line:
@@ -40,6 +42,8 @@ class ValsParser(object):
     @staticmethod
     def parse(spock):
         compiled_pattern = re.compile('^\s*(fun `.*?`\(\)\s*{|@Before)')
+        pattern, replace = VAL_RULE.split('§')[0:2]
+
         state = ParsingContext.INDETERMINATE
         new_lines = []
         for line in spock:
@@ -49,13 +53,12 @@ class ValsParser(object):
                 continue
 
             if state == ParsingContext.MEMBERS:
-                print("VALS")
+                print("VALS: " + line)
                 if len(re.findall(compiled_pattern, line)):
                     new_lines.append(line)
                     state = ParsingContext.INDETERMINATE
                     continue
 
-                pattern, replace = VAL_RULE.split('§')[0:2]
                 new_line = re.sub(pattern, replace, line)
                 new_lines.append(new_line)
                 if new_line != line:
