@@ -1,5 +1,6 @@
 from enum import Enum
-import re
+
+from context import ParsingContext
 
 
 class UnrollerState(Enum):
@@ -50,15 +51,36 @@ class Unroller(object):
 
     def unroll_tests(self):
         new_tests = []
-        for set_index, set in enumerate(self.values):
+        for set_index, value_set in enumerate(self.values):
             method_name = self.recorded_lines[0]
             for name_index, name in enumerate(self.names):
-                method_name = method_name.replace("#{}".format(name), set[name_index].strip('"'))
+                method_name = method_name.replace("#{}".format(name), value_set[name_index].strip('"'))
             new_tests.append(method_name)
             for line in self.recorded_lines[1:]:
 
                 for name_index, name in enumerate(self.names):
-                    line = line.replace(name, set[name_index])
+                    line = line.replace(name, value_set[name_index])
                 new_tests.append(line)
             new_tests.append('')
         return new_tests
+
+    @staticmethod
+    def parse(spock):
+        state = ParsingContext.INDETERMINATE
+        unroller = Unroller()
+        new_lines = []
+        for line in spock:
+            if '@Unroll' in line:
+                state = ParsingContext.UNROLLING
+                continue
+
+            if state == ParsingContext.UNROLLING:
+                if unroller.record(line):
+                    new_tests = unroller.unroll_tests()
+                    state = ParsingContext.INDETERMINATE
+                    new_lines.extend(new_tests)
+                    unroller = Unroller()
+                continue
+
+            new_lines.append(line)
+        return new_lines

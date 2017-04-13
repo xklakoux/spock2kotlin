@@ -1,6 +1,9 @@
 import re
 from enum import Enum
 
+from context import ParsingContext
+
+
 class MapState(Enum):
     NOT_STARTED = 0
     BEFORE_MAP = 1
@@ -37,3 +40,29 @@ class MapParser(object):
 
     def get_lines(self):
         return self.recorded_lines
+
+
+    @staticmethod
+    def parse(spock):
+        state = ParsingContext.INDETERMINATE
+        map_parser = MapParser()
+        new_lines = []
+        for line in spock:
+            if 'Map<' in line or 'Map(' in line:
+                if map_parser.record(line):
+                    state = ParsingContext.INDETERMINATE
+                    new_lines.extend(map_parser.get_lines())
+                    map_parser = MapParser()
+                else:
+                    state = ParsingContext.UNROLLING
+                continue
+
+            if state == ParsingContext.UNROLLING:
+                if map_parser.record(line):
+                    state = ParsingContext.INDETERMINATE
+                    new_lines.extend(map_parser.get_lines())
+                    map_parser = MapParser()
+                continue
+
+            new_lines.append(line)
+        return new_lines

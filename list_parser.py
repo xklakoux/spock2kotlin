@@ -1,4 +1,7 @@
+import re
 from enum import Enum
+
+from context import ParsingContext
 
 
 class ListState(Enum):
@@ -25,3 +28,30 @@ class ListParser(object):
 
     def get_lines(self):
         return self.recorded_lines
+
+    @staticmethod
+    def parse(spock):
+        pattern = re.compile('\[\D{.*}\]')
+        state = ParsingContext.INDETERMINATE
+        list_parser = ListParser()
+        new_lines = []
+        for line in spock:
+            if line:
+                if 'List<' in line or 'List(' in line or len(re.findall(pattern, line)):
+                    if list_parser.record(line):
+                        state = ParsingContext.INDETERMINATE
+                        new_lines.extend(list_parser.get_lines())
+                    else:
+                        state = ParsingContext.UNROLLING
+                    continue
+
+                if state == ParsingContext.UNROLLING:
+                    if list_parser.record(line):
+                        list = list_parser.get_lines()
+                        state = ParsingContext.INDETERMINATE
+                        new_lines.extend(list)
+                        list_parser = ListParser()
+                    continue
+
+            new_lines.append(line)
+        return new_lines
