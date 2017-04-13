@@ -5,6 +5,7 @@ from unroller import Unroller
 from map_parser import MapParser
 from list_parser import ListParser
 from enum import Enum
+import pyperclip
 
 SUPPRESS_ILLEGAL_IDENTIFIER = '@file:Suppress("IllegalIdentifier")\n'
 NEWLINE = "§"
@@ -188,7 +189,8 @@ class SpockParser(object):
 if __name__ == '__main__':
     spock_file = sys.argv[1]
     configuration = 'rules.conf'
-    kotlin_path = ''.join(sys.argv[1].split('\\')[:-1]) + sys.argv[1].split('\\')[-1].split('.')[0] + ".kt"
+    kotlin_path = ''.join(sys.argv[1].split('\\')[:-1]) + sys.argv[1].split('\\')[-1].split('.')[0] + "Kt.kt"
+    kotlin_path = kotlin_path.replace('/test/groovy', '/test/java')
 
     parser = SpockParser(spock_file, configuration)
     kotlin_lines = parser.parse_spock()
@@ -197,3 +199,5 @@ if __name__ == '__main__':
 
         for line in kotlin_lines:
             kotlin_file.write(line + '\n')
+    pyperclip.copy(kotlin_path)
+    print("{} has been copied to your clipboard".format(kotlin_path))
