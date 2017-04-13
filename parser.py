@@ -44,7 +44,7 @@ class SpockParser(object):
 
         return self.spock
 
-    def replace_var(self, ):
+    def replace_var(self):
         state = ParsingContext.INDETERMINATE
         new_lines = []
         for line in self.spock:
