@@ -17,6 +17,22 @@ class MockParser(object):
             line = line + returned[0] + ')'
         return line
 
+class DifferentMockParser(object):
+    @staticmethod
+    def match(line):
+        return ' >>> ' in line
+
+    @staticmethod
+    def replace(line):
+        pattern = re.compile(' >>> (\S+)')
+        returned = re.findall(pattern, line)
+        line = re.sub('^(\s+)(.*?) >>> (.*)', '\\1whenever(\\2).thenReturn(', line)
+        if len(returned) > 1:
+            line = line + ', '.join(returned) + ')'
+        else:
+            line = line + returned[0] + ')'
+        return line
+
 
 class MapParser(object):
     @staticmethod

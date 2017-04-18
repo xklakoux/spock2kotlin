@@ -1,3 +1,4 @@
+import re
 from enum import Enum
 
 from context import ParsingContext
@@ -58,7 +59,6 @@ class Unroller(object):
                 new_tests.append(line)
             new_tests.append('')
         return new_tests
-
 
     @staticmethod
     def parse(spock):

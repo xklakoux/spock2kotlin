@@ -14,7 +14,7 @@ class Formatter:
                 last_line += match.group(2)
             else:
                 if last_line is not '§':
-                    replacement_lines.append(last_line)
+                    replacement_lines.append(last_line.rstrip(';'))
                 last_line = line
 
             for char in line:

@@ -23,7 +23,6 @@ class VarsParser(object):
                 continue
 
             if state == ParsingContext.MEMBERS:
-                print("VARS: " + line)
 
                 if len(re.findall(compiled_pattern, line)):
                     new_lines.append(line)
@@ -31,8 +30,6 @@ class VarsParser(object):
                     continue
                 new_line = re.sub(pattern, replace, line)
                 new_lines.append(new_line)
-                if new_line != line:
-                    print("found match with " + pattern + " on line: " + line + " to " + new_line)
                 continue
             new_lines.append(line)
 
@@ -54,7 +51,6 @@ class ValsParser(object):
                 continue
 
             if state == ParsingContext.MEMBERS:
-                print("VALS: " + line)
                 if len(re.findall(compiled_pattern, line)):
                     new_lines.append(line)
                     state = ParsingContext.FUNCTION
@@ -63,16 +59,11 @@ class ValsParser(object):
 
                 new_line = re.sub(pattern, replace, line)
                 new_lines.append(new_line)
-                if new_line != line:
-                    print("found match with " + pattern + " on line: " + line + " to " + new_line)
                 continue
 
             if state == ParsingContext.FUNCTION:
                 new_line = re.sub(pattern, replace, line)
                 new_lines.append(new_line)
-                if new_line != line:
-                    print("found match with " + pattern + " on line: " + line + " to " + new_line)
-
                 continue
             new_lines.append(line)
         return new_lines
