@@ -1,3 +1,4 @@
+import os
 import sys
 
 import pyperclip
@@ -8,7 +9,6 @@ from declarations import VarsParser
 from formatter import Formatter
 from regexparser import RegexParser
 from unroller import Unroller
-import os
 
 SUPPRESS_ILLEGAL_IDENTIFIER = '@file:Suppress("IllegalIdentifier")\n'
 
@@ -41,7 +41,8 @@ class SpockParser:
 
 if __name__ == '__main__':
 
-    one_liners = [oneliners.MockParser, oneliners.DifferentMockParser, oneliners.MapParser, oneliners.ListParser]
+    one_liners = [oneliners.MockParser, oneliners.DifferentMockParser, oneliners.MapParser, oneliners.ListParser,
+                  oneliners.LengthParser, oneliners.SizeParser, oneliners.FunNameTypeSwapper]
     parsers = [RegexParser, Unroller, VarsParser, ValsParser]
 
     for path, subdirs, files in os.walk(sys.argv[1]):

@@ -17,6 +17,7 @@ class MockParser(object):
             line = line + returned[0] + ')'
         return line
 
+
 class DifferentMockParser(object):
     @staticmethod
     def match(line):
@@ -90,3 +91,59 @@ class ListParser(object):
         line = line.replace(']', ')')
 
         return line
+
+
+class LengthParser(object):
+    @staticmethod
+    def match(line):
+        return re.match('.*\.length\(\).*', line)
+
+    @staticmethod
+    def replace(line):
+        line = line.replace('.length()', '.length')
+
+        return line
+
+
+class SizeParser(object):
+    @staticmethod
+    def match(line):
+        return re.match('.*\.size\(\).*', line)
+
+    @staticmethod
+    def replace(line):
+        line = line.replace('.size()', '.size')
+
+        return line
+
+
+class FunNameTypeSwapper(object):
+    @staticmethod
+    def match(line):
+        return re.match('^(\s+)private fun .* {$', line)
+
+    @staticmethod
+    def replace(line):
+        type = '[A-Z][a-zA-Z_0-9<>,]+(, )*[a-zA-Z_0-9<>,]+'  # 2 groups
+        var_name = '[a-zA-Z_0-9<>,]+'
+        pattern = re.compile('^(\s+private fun .*\()(.*)(\) {$)')
+        match = re.search(pattern, line)
+
+        arguments_list = match.group(2)
+
+        new_list = ''
+        generics = 0
+        for char in arguments_list:
+            if generics == 0 and char is ',':
+                char = '§'
+            elif char is '<':
+                generics += 1
+            elif char is '>':
+                generics -= 1
+            new_list += char
+
+        arguments = []
+        for argument in new_list.split('§'):
+            arguments.append(re.sub('(' + type + ') (' + var_name + ')', '\\3: \\1', argument))
+
+        return match.group(1) + ','.join(arguments) + match.group(3)

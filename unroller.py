@@ -22,12 +22,14 @@ class Unroller(object):
     def record(self, line):
 
         if self.state == UnrollerState.NAMES:
+            line = line.replace('||', '|')
             self.names = [var.strip() for var in line.split('|')]
             self.state = UnrollerState.VALUES
             return False
 
         elif self.state == UnrollerState.VALUES:
             if '|' in line:
+                line = line.replace('||', '|')
                 self.values.append([var.strip() for var in line.split('|')])
                 return False
             else:
@@ -51,14 +53,26 @@ class Unroller(object):
             method_name = self.recorded_lines[0]
             for name_index, name in enumerate(self.names):
                 method_name = method_name.replace("#{}".format(name), set[name_index].strip('"'))
+                method_name = self.replace_invalid_chars(method_name)
             new_tests.append(method_name)
             for line in self.recorded_lines[1:]:
 
                 for name_index, name in enumerate(self.names):
-                    line = line.replace(name, set[name_index])
+                    line = re.sub(name + '([^\(])', set[name_index] + '\\1', line)
+                    line = re.sub(name + '$', set[name_index], line)
                 new_tests.append(line)
             new_tests.append('')
         return new_tests
+
+    def replace_invalid_chars(self, method_name):
+        method_name = method_name.replace(',', '[coma]')
+        method_name = method_name.replace('.', '[dot]')
+        method_name = method_name.replace('[', '(')
+        method_name = method_name.replace(']', ')')
+        method_name = method_name.replace(':', '')
+        method_name = method_name.replace('\\n', ' newline ')
+
+        return method_name
 
     @staticmethod
     def parse(spock):
