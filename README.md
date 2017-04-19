@@ -4,7 +4,7 @@ best effort parser from spock to kotlin
 
 spock2kotlin uses python3
 
-###Usage
+### Usage
 usage `python3 parsespocky.py [path]`
 
 where `path` could be 
