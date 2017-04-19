@@ -8,7 +8,7 @@ class MockParser(object):
 
     @staticmethod
     def replace(line):
-        pattern = re.compile(' >> (\S+)')
+        pattern = re.compile(' >> ([^>]+)')
         returned = re.findall(pattern, line)
         line = re.sub('^(\s+)(.*?) >> (.*)', '\\1whenever(\\2).thenReturn(', line)
         if len(returned) > 1:
@@ -83,13 +83,14 @@ class MapParser(object):
 class ListParser(object):
     @staticmethod
     def match(line):
-        return re.match('.*\[\D+].*', line)
+        return re.match('.*\[\D+.*].*', line)
 
     @staticmethod
     def replace(line):
         line = line.replace('[', 'listOf(')
         line = line.replace(']', ')')
-
+        if ListParser.match(line):
+            return ListParser.replace(line)
         return line
 
 
@@ -147,3 +148,13 @@ class FunNameTypeSwapper(object):
             arguments.append(re.sub('(' + type + ') (' + var_name + ')', '\\3: \\1', argument))
 
         return match.group(1) + ','.join(arguments) + match.group(3)
+
+
+class QuoteReplacer(object):
+    @staticmethod
+    def match(line):
+        return re.match('\'', line)
+
+    @staticmethod
+    def replace(line):
+        return line.replace('\'', '"')

@@ -71,6 +71,7 @@ class Unroller(object):
         method_name = method_name.replace(']', ')')
         method_name = method_name.replace(':', '')
         method_name = method_name.replace('\\n', ' newline ')
+        method_name = method_name.replace('\\', ' [slash] ')
 
         return method_name
 

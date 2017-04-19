@@ -6,7 +6,7 @@ TYPE = '[A-Z][a-zA-Z_0-9<>,]+(, )*[a-zA-Z_0-9<>,]+'  # 2 groups
 VAR_NAME = '[a-zA-Z_0-9<>,]+'
 MEMBER_VAR_RULE = '^(\s+)(val )?(' + TYPE + ')\s+(' + VAR_NAME + ')\s*$§\\1private lateinit var \\5: \\3§'
 MEMBER_VAL_RULE = '^(\s+)(val )?(' + TYPE + ')\s+(' + VAR_NAME + ')\s*=(.*)§\\1private val \\5: \\3 =\\6§'
-LOCAL_VAL_RULE = '^(\s+)(' + TYPE + ')\s+(' + VAR_NAME + ')\s*=(.*)§\\1val \\4: \\2 =\\5§'
+LOCAL_VAL_RULE = '^(\s+)(val )?(' + TYPE + ')\s+(' + VAR_NAME + ')\s*=(.*)§\\1val \\5: \\3 =\\6§'
 END_MEMBERS_PATTERN = re.compile('^.*\s+(fun .*{|@Before)')
 
 

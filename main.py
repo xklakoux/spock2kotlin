@@ -42,7 +42,7 @@ class SpockParser:
 if __name__ == '__main__':
 
     one_liners = [oneliners.MockParser, oneliners.DifferentMockParser, oneliners.MapParser, oneliners.ListParser,
-                  oneliners.LengthParser, oneliners.SizeParser, oneliners.FunNameTypeSwapper]
+                  oneliners.LengthParser, oneliners.SizeParser, oneliners.FunNameTypeSwapper, oneliners.QuoteReplacer]
     parsers = [RegexParser, Unroller, VarsParser, ValsParser]
 
     for path, subdirs, files in os.walk(sys.argv[1]):
