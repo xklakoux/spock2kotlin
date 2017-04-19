@@ -26,6 +26,8 @@ class RegexParser(object):
             for codeline in spock:
                 new_line = re.sub(pattern, replace, codeline)
                 new_lines.append(new_line)
+                if not new_line and new_line != codeline:
+                    new_lines.pop()
             spock = new_lines
             new_lines = []
         return spock

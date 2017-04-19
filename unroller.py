@@ -52,7 +52,7 @@ class Unroller(object):
         for set_index, set in enumerate(self.values):
             method_name = self.recorded_lines[0]
             for name_index, name in enumerate(self.names):
-                method_name = method_name.replace("#{}".format(name), set[name_index].strip('"'))
+                method_name = method_name.replace("#{}".format(name), set[name_index].strip().strip('"'))
                 method_name = self.replace_invalid_chars(method_name)
             new_tests.append(method_name)
             for line in self.recorded_lines[1:]:
