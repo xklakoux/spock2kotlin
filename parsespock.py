@@ -59,6 +59,7 @@ if __name__ == '__main__':
 
                 spock_parser = SpockParser(spock_file, parsers, one_liners)
                 kotlin_lines = spock_parser.parse()
+
                 os.makedirs(os.path.dirname(kotlin_path), exist_ok=True)
                 with open(kotlin_path, "w+", encoding="utf-8") as kotlin_file:
 
@@ -73,7 +74,8 @@ if __name__ == '__main__':
         spock_parser = SpockParser(spock_file, parsers, one_liners)
         kotlin_lines = spock_parser.parse()
 
-        with open(kotlin_path, "w+") as kotlin_file:
+        os.makedirs(os.path.dirname(kotlin_path), exist_ok=True)
+        with open(kotlin_path, "w+", encoding="utf-8") as kotlin_file:
 
             for line in kotlin_lines:
                 kotlin_file.write(line + '\n')

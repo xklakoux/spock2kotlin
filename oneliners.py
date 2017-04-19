@@ -8,9 +8,10 @@ class MockParser(object):
 
     @staticmethod
     def replace(line):
-        pattern = re.compile(' >> ([^>]+)')
+        pattern = re.compile(' >> (.+((?= >> )|$))')
         returned = re.findall(pattern, line)
         line = re.sub('^(\s+)(.*?) >> (.*)', '\\1whenever(\\2).thenReturn(', line)
+        returned = [a for (a,b) in returned]
         if len(returned) > 1:
             line = line + ', '.join(returned) + ')'
         else:
