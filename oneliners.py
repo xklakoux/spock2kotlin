@@ -1,6 +1,16 @@
 import re
 
 
+class MockThrowParser(object):
+    @staticmethod
+    def match(line):
+        return ' >> { throw' in line
+
+    @staticmethod
+    def replace(line):
+        line = re.sub(r'^(\s+)(.*?) >> { throw (.*?) }', '\\1whenever(\\2).thenThrow(\\3)', line)
+        return line
+
 class MockParser(object):
     @staticmethod
     def match(line):
@@ -11,7 +21,7 @@ class MockParser(object):
         pattern = re.compile(' >> (.+((?= >> )|$))')
         returned = re.findall(pattern, line)
         line = re.sub('^(\s+)(.*?) >> (.*)', '\\1whenever(\\2).thenReturn(', line)
-        returned = [a for (a,b) in returned]
+        returned = [a for (a, b) in returned]
         if len(returned) > 1:
             line = line + ', '.join(returned) + ')'
         else:
@@ -39,7 +49,7 @@ class DifferentMockParser(object):
 class MapParser(object):
     @staticmethod
     def match(line):
-        return re.match('.*\[.*:.*\].*', line)
+        return re.search('\[.*:.*\]', line)
 
     @staticmethod
     def replace(line):
@@ -84,7 +94,7 @@ class MapParser(object):
 class ListParser(object):
     @staticmethod
     def match(line):
-        return re.match('.*\[\D+.*].*', line)
+        return re.search('\s\[\D+.*]', line)
 
     @staticmethod
     def replace(line):
@@ -98,7 +108,7 @@ class ListParser(object):
 class LengthParser(object):
     @staticmethod
     def match(line):
-        return re.match('.*\.length\(\).*', line)
+        return re.search('\.length\(\)', line)
 
     @staticmethod
     def replace(line):
@@ -110,7 +120,7 @@ class LengthParser(object):
 class SizeParser(object):
     @staticmethod
     def match(line):
-        return re.match('.*\.size\(\).*', line)
+        return re.search('\.size\(\)', line)
 
     @staticmethod
     def replace(line):
@@ -119,10 +129,10 @@ class SizeParser(object):
         return line
 
 
-class FunNameTypeSwapper(object):
+class ArgumentsNameTypeSwapper(object):
     @staticmethod
     def match(line):
-        return re.match('^(\s+)private fun .* {$', line)
+        return re.search('^(\s+)private fun .* {$', line)
 
     @staticmethod
     def replace(line):
@@ -154,8 +164,21 @@ class FunNameTypeSwapper(object):
 class QuoteReplacer(object):
     @staticmethod
     def match(line):
-        return re.match('\'', line)
+        return re.search('\'', line)
 
     @staticmethod
     def replace(line):
         return line.replace('\'', '"')
+
+
+class VerifyReplacer(object):
+    @staticmethod
+    def match(line):
+        return re.search('^(\s+)(\d{1,3}) \* (.*?)\.(.*)', line)
+
+    @staticmethod
+    def replace(line):
+        if re.search('^(\s+)(\d{1,3}) \* (.*?)\.(.*)', line).group(2) is '1':
+            return re.sub('^(\s+)(\d{1,3}) \* (.*?)\.(.*)', '\\1verify(\\3).\\4', line)
+        else:
+            return re.sub('^(\s+)(\d{1,3}) \* (.*?)\.(.*)', '\\1verify(\\3, times(\\2)).\\4', line)

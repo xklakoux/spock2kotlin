@@ -17,6 +17,7 @@ class Unroller(object):
         self.names = []
         self.values = []
         self.recorded_lines = []
+        self.givens = []
         self.state = UnrollerState.START
 
     def record(self, line):
@@ -31,6 +32,9 @@ class Unroller(object):
             if '|' in line:
                 line = line.replace('||', '|')
                 self.values.append([var.strip() for var in line.split('|')])
+                return False
+            elif '=' in line:
+                self.givens.append(line)
                 return False
             else:
                 self.state = UnrollerState.END
@@ -48,18 +52,26 @@ class Unroller(object):
         return False
 
     def unroll_tests(self):
+        self.givens = ['val ' + given for given in self.givens]
+
         new_tests = []
-        for set_index, set in enumerate(self.values):
+        for set_index, _set in enumerate(self.values):
             method_name = self.recorded_lines[0]
             for name_index, name in enumerate(self.names):
-                method_name = method_name.replace("#{}".format(name), set[name_index].strip().strip('"'))
+                method_name = method_name.replace("#{}".format(name), _set[name_index].strip().strip('"'))
                 method_name = self.replace_invalid_chars(method_name)
             new_tests.append(method_name)
-            for line in self.recorded_lines[1:]:
 
+            new_givens = []
+            for given in self.givens:
                 for name_index, name in enumerate(self.names):
-                    line = re.sub(name + '([^\(])', set[name_index] + '\\1', line)
-                    line = re.sub(name + '$', set[name_index], line)
+                    given = re.sub(r'([^.]){}(\b)'.format(name), '\g<1>' + _set[name_index] + '\g<2>', given)
+                new_tests.append(given)
+            new_tests.extend(new_givens)
+
+            for line in self.recorded_lines[1:]:
+                for name_index, name in enumerate(self.names):
+                    line = re.sub(r'([^.]){}(\b)'.format(name), '\g<1>' + _set[name_index] + '\g<2>', line)
                 new_tests.append(line)
             new_tests.append('')
         return new_tests

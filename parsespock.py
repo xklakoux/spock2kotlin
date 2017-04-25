@@ -42,8 +42,17 @@ class SpockParser:
 
 if __name__ == '__main__':
 
-    one_liners = [oneliners.MockParser, oneliners.DifferentMockParser, oneliners.MapParser, oneliners.ListParser,
-                  oneliners.LengthParser, oneliners.SizeParser, oneliners.FunNameTypeSwapper, oneliners.QuoteReplacer]
+    one_liners = [oneliners.MockThrowParser,
+                  oneliners.MockParser,
+                  oneliners.DifferentMockParser,
+                  oneliners.MapParser,
+                  oneliners.ListParser,
+                  oneliners.LengthParser,
+                  oneliners.SizeParser,
+                  oneliners.ArgumentsNameTypeSwapper,
+                  oneliners.QuoteReplacer,
+                  oneliners.VerifyReplacer]
+
     parsers = [RegexParser, Unroller, VarsParser, ValsParser]
 
     if len(sys.argv) != 2:

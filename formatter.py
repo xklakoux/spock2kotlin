@@ -23,4 +23,17 @@ class Formatter:
                 elif char == '}':
                     braces_stack -= 1
         replacement_lines.append(last_line)
-        return replacement_lines
+
+        # remove double blank lines
+        previous_line = replacement_lines[0]
+        formatted_lines = [previous_line]
+        for line in replacement_lines[1:]:
+            if re.search('\S', line) or re.search('\S', previous_line):
+                formatted_lines.append(line)
+                previous_line = line
+
+        # remove last line if empty
+        if not re.match('\S', formatted_lines[-1]):
+            formatted_lines.pop()
+
+        return formatted_lines
