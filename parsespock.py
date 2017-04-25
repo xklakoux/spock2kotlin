@@ -1,5 +1,5 @@
+import argparse
 import os
-import sys
 
 import pyperclip
 
@@ -42,6 +42,11 @@ class SpockParser:
 
 if __name__ == '__main__':
 
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument('path', help="a groovy file or path to test/groovy dir that will be scanned recursively")
+    argparser.add_argument('-u', '--unrollbig', help="unroll for value sets more than 3", action="store_true")
+    args = argparser.parse_args()
+
     one_liners = [oneliners.MockThrowParser,
                   oneliners.MockParser,
                   oneliners.DifferentMockParser,
@@ -50,17 +55,14 @@ if __name__ == '__main__':
                   oneliners.LengthParser,
                   oneliners.SizeParser,
                   oneliners.ArgumentsNameTypeSwapper,
+                  oneliners.FunctionNameEnhancer,
                   oneliners.QuoteReplacer,
                   oneliners.VerifyReplacer]
 
-    parsers = [RegexParser, Unroller, VarsParser, ValsParser]
+    parsers = [RegexParser, Unroller(args.unrollbig), VarsParser, ValsParser]
 
-    if len(sys.argv) != 2:
-        print("Please provide one argument that is:\n a groovy file\n test/groovy that will be scanned recursively")
-        sys.exit(0)
-
-    if os.path.isdir(sys.argv[1]):
-        for path, subdirs, files in os.walk(sys.argv[1]):
+    if os.path.isdir(args.path):
+        for path, subdirs, files in os.walk(args.path):
             for name in files:
                 spock_file = os.path.join(path, name)
                 kotlin_path = ''.join(spock_file.split('\\')[:-1]) + spock_file.split('\\')[-1].split('.')[0] + "Kt.kt"
@@ -76,14 +78,15 @@ if __name__ == '__main__':
                         kotlin_file.write(line + '\n')
                     print('Kotlin file {} created'.format(kotlin_path))
     else:
-        spock_file = sys.argv[1]
-        kotlin_path = ''.join(sys.argv[1].split('\\')[:-1]) + sys.argv[1].split('\\')[-1].split('.')[0] + "Kt.kt"
+        spock_file = args.path
+        kotlin_path = ''.join(args.path.split('\\')[:-1]) + args.path.split('\\')[-1].split('.')[0] + "Kt.kt"
         kotlin_path = kotlin_path.replace('/test/groovy', '/test/java')
 
         spock_parser = SpockParser(spock_file, parsers, one_liners)
         kotlin_lines = spock_parser.parse()
 
-        os.makedirs(os.path.dirname(kotlin_path), exist_ok=True)
+        if '/' in kotlin_path:
+            os.makedirs(os.path.dirname(kotlin_path), exist_ok=True)
         with open(kotlin_path, "w+", encoding="utf-8") as kotlin_file:
 
             for line in kotlin_lines:

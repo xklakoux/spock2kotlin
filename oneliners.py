@@ -11,6 +11,7 @@ class MockThrowParser(object):
         line = re.sub(r'^(\s+)(.*?) >> { throw (.*?) }', '\\1whenever(\\2).thenThrow(\\3)', line)
         return line
 
+
 class MockParser(object):
     @staticmethod
     def match(line):
@@ -159,6 +160,20 @@ class ArgumentsNameTypeSwapper(object):
             arguments.append(re.sub('(' + type + ') (' + var_name + ')', '\\3: \\1', argument))
 
         return match.group(1) + ','.join(arguments) + match.group(3)
+
+
+class FunctionNameEnhancer(object):
+    @staticmethod
+    def match(line):
+        return re.search(r'\s{2,}fun `.*?` \(\) \{', line)
+
+    @staticmethod
+    def replace(line):
+        line = re.sub(r'correct(ly)?(\s+)', '', line)
+        line = re.sub(r"should'?nt(\s+)", 'doesnt ', line)
+        line = re.sub(r"should not(\s+)", 'doesnt ', line)
+        line = re.sub(r'should(\s+)(\w+)(\b)', '\\2s\\3', line)
+        return line
 
 
 class QuoteReplacer(object):

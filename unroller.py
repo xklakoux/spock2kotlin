@@ -12,16 +12,20 @@ class UnrollerState(Enum):
 
 
 class Unroller(object):
-    def __init__(self):
+    unroll_big = False
+
+    def __init__(self, unroll_big):
         self.brackets_stack = []
         self.names = []
         self.values = []
         self.recorded_lines = []
         self.givens = []
         self.state = UnrollerState.START
+        self.all_lines = []
+        Unroller.unroll_big = unroll_big
 
     def record(self, line):
-
+        self.all_lines.append(line)
         if self.state == UnrollerState.NAMES:
             line = line.replace('||', '|')
             self.names = [var.strip() for var in line.split('|')]
@@ -40,6 +44,8 @@ class Unroller(object):
                 self.state = UnrollerState.END
 
         if 'where:' in line:
+            if not re.search('\S', self.recorded_lines[-1]):
+                self.recorded_lines.pop()
             self.state = UnrollerState.NAMES
             return False
 
@@ -52,6 +58,10 @@ class Unroller(object):
         return False
 
     def unroll_tests(self):
+
+        if len(self.values) > 3 and not Unroller.unroll_big:
+            return self.all_lines
+
         self.givens = ['val ' + given for given in self.givens]
 
         new_tests = []
@@ -90,7 +100,7 @@ class Unroller(object):
     @staticmethod
     def parse(spock):
         state = ParsingContext.INDETERMINATE
-        unroller = Unroller()
+        unroller = Unroller(Unroller.unroll_big)
         new_lines = []
         for line in spock:
             if '@Unroll' in line:
@@ -102,7 +112,7 @@ class Unroller(object):
                     new_tests = unroller.unroll_tests()
                     state = ParsingContext.INDETERMINATE
                     new_lines.extend(new_tests)
-                    unroller = Unroller()
+                    unroller = Unroller(Unroller.unroll_big)
                 continue
 
             new_lines.append(line)
