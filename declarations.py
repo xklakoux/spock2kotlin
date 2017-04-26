@@ -78,7 +78,6 @@ class SwapPrivateToProtectedParser(object):
         else:
             return spock
 
-        pattern, replace = '', ''
         state = ParsingContext.INDETERMINATE
         new_lines = []
         for line in spock:
