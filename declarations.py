@@ -73,7 +73,7 @@ class SwapPrivateToProtectedParser(object):
     def parse(spock):
 
         for line in spock:
-            if 'Parameterized' in line:
+            if '@Parameterized' in line:
                 break
         else:
             return spock
