@@ -29,6 +29,7 @@ class Unroller(object):
         if self.state == UnrollerState.NAMES:
             line = line.replace('||', '|')
             self.names = [var.strip() for var in line.split('|')]
+            self.all_lines.pop()
             self.state = UnrollerState.VALUES
             return False
 
@@ -36,6 +37,7 @@ class Unroller(object):
             if '|' in line:
                 line = line.replace('||', '|')
                 self.values.append([var.strip() for var in line.split('|')])
+                self.all_lines.pop()
                 return False
             elif '=' in line:
                 self.givens.append(line)
@@ -46,7 +48,12 @@ class Unroller(object):
         if 'where:' in line:
             if not re.search('\S', self.recorded_lines[-1]):
                 self.recorded_lines.pop()
+
+            if not re.search('\S', self.all_lines[-1]):
+                self.all_lines.pop()
+
             self.state = UnrollerState.NAMES
+            self.all_lines.pop()
             return False
 
         self.recorded_lines.append(line)
@@ -60,7 +67,7 @@ class Unroller(object):
     def unroll_tests(self):
 
         if len(self.values) > 3 and not Unroller.unroll_big:
-            return self.all_lines
+            return self.get_parameterized_template()
 
         self.givens = ['val ' + given for given in self.givens]
 
@@ -117,3 +124,28 @@ class Unroller(object):
 
             new_lines.append(line)
         return new_lines
+
+    def get_parameterized_template(self):
+        class_name = re.search('`(.*)`', self.all_lines[0]).group(1)
+
+        coma_separator = ',\n'
+        parameters = coma_separator.join(["private val " + name + ": " for name in self.names])
+        values = coma_separator.join(['{ arrayOf(' + ', '.join(vals) + ') }' for vals in self.values])
+
+        pipe_whitespace = ' |\n' + ' ' * 48
+        names = pipe_whitespace.join([name + ' {' + str(index) + '}' for index, name in enumerate(self.names)])
+
+        parameterized_template = '''
+        @RunWith(Parameterized::class)
+class `{}`({}) : Setup() {{
+
+    companion object {{
+        @JvmStatic
+        @Parameterized.Parameters(name = """{}
+                                            """)
+        fun data() = createData({})
+    }}         
+        '''.format(class_name, parameters, names, values)
+        self.all_lines.insert(0, parameterized_template)
+        self.all_lines.append("}")
+        return self.all_lines

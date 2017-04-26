@@ -4,6 +4,7 @@ import os
 import pyperclip
 
 import oneliners
+from declarations import SwapPrivateToProtectedParser
 from declarations import ValsParser
 from declarations import VarsParser
 from formatter import Formatter
@@ -36,6 +37,8 @@ class SpockParser:
                     line = one_liner.replace(line)
             new_lines.append(line)
         self.spock = new_lines
+
+        self.spock = SwapPrivateToProtectedParser.parse(self.spock)
 
         return self.spock
 
