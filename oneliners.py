@@ -137,7 +137,7 @@ class ArgumentsNameTypeSwapper(object):
 
     @staticmethod
     def replace(line):
-        type = '[A-Z][a-zA-Z_0-9<>,]+(, )*[a-zA-Z_0-9<>,]+'  # 2 groups
+        _type = '[A-Z][a-zA-Z_0-9<>,]+(, )*[a-zA-Z_0-9<>,]+'  # 2 groups
         var_name = '[a-zA-Z_0-9<>,]+'
         pattern = re.compile('^(\s+private fun .*\()(.*)(\) {$)')
         match = re.search(pattern, line)
@@ -157,7 +157,7 @@ class ArgumentsNameTypeSwapper(object):
 
         arguments = []
         for argument in new_list.split('§'):
-            arguments.append(re.sub('(' + type + ') (' + var_name + ')', '\\3: \\1', argument))
+            arguments.append(re.sub('(' + _type + ') (' + var_name + ')', '\\3: \\1', argument))
 
         return match.group(1) + ','.join(arguments) + match.group(3)
 

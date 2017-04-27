@@ -15,12 +15,12 @@ SUPPRESS_ILLEGAL_IDENTIFIER = '@file:Suppress("IllegalIdentifier")\n'
 
 
 class SpockParser:
-    def __init__(self, spock_path, parsers, one_liners):
+    def __init__(self, spock_path, parsers_conf, one_liners_conf):
         with open(spock_path, encoding="utf-8") as open_spock_file:
             self.spock = open_spock_file.read().splitlines()
             self.rules = []
-            self.parsers = parsers
-            self.one_liners = one_liners
+            self.parsers = parsers_conf
+            self.one_liners = one_liners_conf
 
     def parse(self):
         self.spock.insert(0, SUPPRESS_ILLEGAL_IDENTIFIER)
@@ -39,7 +39,7 @@ class SpockParser:
         self.spock = new_lines
 
         self.spock = SwapPrivateToProtectedParser.parse(self.spock)
-        self.spock = Formatter.removeDoubleEmptyLines(self.spock)
+        self.spock = Formatter.remove_double_empty_lines(self.spock)
 
         return self.spock
 

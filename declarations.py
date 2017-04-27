@@ -106,7 +106,7 @@ class SwapPrivateToProtectedParser(object):
                 continue
 
             if state == ParsingContext.BEFORE:
-                if re.match('^    }', line):
+                if re.match('^ {4}}', line):
                     new_lines.append(line)
                     new_lines.append('}\n')
                     new_lines.append(class_name_line)

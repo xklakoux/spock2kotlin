@@ -39,7 +39,7 @@ class Formatter:
         return formatted_lines
 
     @staticmethod
-    def removeDoubleEmptyLines(spock):
+    def remove_double_empty_lines(spock):
 
         previous_line = spock[0]
         formatted_lines = [previous_line]

@@ -95,7 +95,8 @@ class Unroller(object):
             new_tests.append('')
         return new_tests
 
-    def replace_invalid_chars(self, method_name):
+    @staticmethod
+    def replace_invalid_chars(method_name):
         method_name = method_name.replace(',', '[coma]')
         method_name = method_name.replace('.', '[dot]')
         method_name = method_name.replace('[', '(')
