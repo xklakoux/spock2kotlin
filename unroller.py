@@ -12,7 +12,7 @@ class UnrollerState(Enum):
 
 
 class Unroller(object):
-    unroll_big = False
+    should_unroll_big = False
 
     def __init__(self, unroll_big):
         self.brackets_stack = []
@@ -22,7 +22,8 @@ class Unroller(object):
         self.givens = []
         self.state = UnrollerState.START
         self.all_lines = []
-        Unroller.unroll_big = unroll_big
+        self.was_parameterized = False
+        Unroller.should_unroll_big = unroll_big
 
     def record(self, line):
         self.all_lines.append(line)
@@ -66,7 +67,8 @@ class Unroller(object):
 
     def unroll_tests(self):
 
-        if len(self.values) > 3 and not Unroller.unroll_big:
+        if len(self.values) > 3 and not Unroller.should_unroll_big:
+            self.was_parameterized = True
             return self.get_parameterized_template()
 
         self.givens = ['val ' + given for given in self.givens]
@@ -107,8 +109,9 @@ class Unroller(object):
     @staticmethod
     def parse(spock):
         state = ParsingContext.INDETERMINATE
-        unroller = Unroller(Unroller.unroll_big)
+        unroller = Unroller(Unroller.should_unroll_big)
         new_lines = []
+        parameterized_lines = []
         for line in spock:
             if '@Unroll' in line:
                 state = ParsingContext.UNROLLING
@@ -118,11 +121,15 @@ class Unroller(object):
                 if unroller.record(line):
                     new_tests = unroller.unroll_tests()
                     state = ParsingContext.INDETERMINATE
-                    new_lines.extend(new_tests)
-                    unroller = Unroller(Unroller.unroll_big)
+                    if not unroller.was_parameterized:
+                        new_lines.extend(new_tests)
+                    else:
+                        parameterized_lines.extend(new_tests)
+                    unroller = Unroller(Unroller.should_unroll_big)
                 continue
 
             new_lines.append(line)
+        new_lines.extend(parameterized_lines)
         return new_lines
 
     def get_parameterized_template(self):

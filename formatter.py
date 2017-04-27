@@ -37,3 +37,15 @@ class Formatter:
             formatted_lines.pop()
 
         return formatted_lines
+
+    @staticmethod
+    def removeDoubleEmptyLines(spock):
+
+        previous_line = spock[0]
+        formatted_lines = [previous_line]
+        for line in spock[1:]:
+            if re.search('\S', line) or re.search('\S', previous_line):
+                formatted_lines.append(line)
+                previous_line = line
+
+        return formatted_lines

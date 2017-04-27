@@ -80,24 +80,37 @@ class SwapPrivateToProtectedParser(object):
 
         state = ParsingContext.INDETERMINATE
         new_lines = []
+        class_name_line = ''
         for line in spock:
-            if 'class' in line:
+            if 'class' in line and state == ParsingContext.INDETERMINATE:
                 state = ParsingContext.MEMBERS
-                new_lines.append(line)
+                class_name_line = re.sub('{', ': Setup() {', line)
+                new_lines.append('abstract class Setup {')
                 continue
 
             if state == ParsingContext.MEMBERS:
+                if '@Before' in line:
+                    state = ParsingContext.BEFORE
+                    new_lines.append(line)
+                    continue
+
                 if len(re.findall(END_MEMBERS_PATTERN, line)):
                     state = ParsingContext.FUNCTION
+                    new_lines.append('}\n')
+                    new_lines.append(class_name_line)
+                    new_lines.append('')
                     new_lines.append(re.sub('private', 'protected', line))
                     continue
 
                 new_lines.append(re.sub('private', 'protected', line))
                 continue
 
-            if state == ParsingContext.FUNCTION:
-                if len(re.findall(END_MEMBERS_PATTERN, line)):
-                    new_lines.append(re.sub('private', 'protected', line))
+            if state == ParsingContext.BEFORE:
+                if re.match('^    }', line):
+                    new_lines.append(line)
+                    new_lines.append('}\n')
+                    new_lines.append(class_name_line)
+                    state = ParsingContext.FUNCTION
                     continue
 
             new_lines.append(line)

@@ -39,6 +39,7 @@ class SpockParser:
         self.spock = new_lines
 
         self.spock = SwapPrivateToProtectedParser.parse(self.spock)
+        self.spock = Formatter.removeDoubleEmptyLines(self.spock)
 
         return self.spock
 

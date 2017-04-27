@@ -7,3 +7,4 @@ class ParsingContext(Enum):
     MEMBERS = 2
     FUNCTION = 3
     INDETERMINATE = 4
+    BEFORE = 5
