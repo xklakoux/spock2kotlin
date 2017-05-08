@@ -27,12 +27,22 @@ class Unroller(object):
 
     def record(self, line):
         self.all_lines.append(line)
+
         if self.state == UnrollerState.NAMES:
-            line = line.replace('||', '|')
-            self.names = [var.strip() for var in line.split('|')]
-            self.all_lines.pop()
-            self.state = UnrollerState.VALUES
-            return False
+            if '<<' in line:
+                self.names.append(line.split(' << ')[0].strip())
+                vals = line.split(' << ')[-1].strip().lstrip('[').rstrip(']').split(',')
+                self.values.extend([[val.strip()] for val in vals])
+                self.all_lines.pop()
+                self.state = UnrollerState.END
+                return False
+
+            if self.state == UnrollerState.NAMES:
+                line = line.replace('||', '|')
+                self.names = [var.strip() for var in line.split('|')]
+                self.all_lines.pop()
+                self.state = UnrollerState.VALUES
+                return False
 
         elif self.state == UnrollerState.VALUES:
             if '|' in line:
@@ -138,7 +148,8 @@ class Unroller(object):
 
         coma_separator = ',\n'
         parameters = coma_separator.join(["private val " + name + ": " for name in self.names])
-        values = coma_separator.join(['{ arrayOf(' + ', '.join(vals) + ') }' for vals in self.values])
+        data_whitespace = ' ' * 16
+        values = coma_separator.join([data_whitespace + '{ arrayOf(' + ', '.join(vals) + ') }' for vals in self.values])
 
         pipe_whitespace = ' |\n' + ' ' * 48
         names = pipe_whitespace.join([name + ' {' + str(index) + '}' for index, name in enumerate(self.names)])
@@ -151,7 +162,9 @@ class `{}`({}) : Setup() {{
         @JvmStatic
         @Parameterized.Parameters(name = """{}
                                             """)
-        fun data() = createData({})
+        fun data() = createData(
+{}
+        )
     }}         
         '''.format(class_name, parameters, names, values)
         self.all_lines.insert(0, parameterized_template)
