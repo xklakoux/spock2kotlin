@@ -1,11 +1,11 @@
 # spock2kotlin 
 
-best effort parser from spock to kotlin
+best effort transpiler from spock to kotlin
 
 spock2kotlin uses python3
 
 ### Usage
-usage `python3 parsespocky.py [path]`
+usage `python3 parse.py [path]`
 
 where `path` could be 
 * path to test/groovy, then it parses groovy files recursively and creates kotlin files in test/kotlin/
